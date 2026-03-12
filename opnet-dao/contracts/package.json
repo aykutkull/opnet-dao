@@ -1,0 +1,26 @@
+{
+    "name": "@opnet-dao/contracts",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "npm run build:token && npm run build:governor",
+        "build:token": "asc src/token/index.ts --target token --measure --uncheckedBehavior never",
+        "build:governor": "asc src/governor/index.ts --target governor --measure --uncheckedBehavior never",
+        "format": "prettier --write .",
+        "lint": "eslint . --fix"
+    },
+    "dependencies": {
+        "@btc-vision/as-bignum": "latest",
+        "@btc-vision/btc-runtime": "rc",
+        "@btc-vision/opnet-transform": "latest",
+        "@assemblyscript/loader": "latest"
+    },
+    "devDependencies": {
+        "@btc-vision/assemblyscript": "^0.29.2",
+        "prettier": "latest",
+        "eslint": "^10.0.0",
+        "@eslint/js": "^10.0.1",
+        "typescript-eslint": "^8.56.0"
+    }
+}

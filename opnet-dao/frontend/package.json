@@ -1,0 +1,35 @@
+{
+    "name": "@opnet-dao/frontend",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc --noEmit && vite build",
+        "preview": "vite preview",
+        "format": "prettier --write .",
+        "lint": "eslint src --fix",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@btc-vision/bitcoin": "rc",
+        "@btc-vision/walletconnect": "latest",
+        "opnet": "rc",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@btc-vision/transaction": "rc",
+        "@eslint/js": "^10.0.1",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "eslint": "^10.0.0",
+        "eslint-plugin-react": "latest",
+        "eslint-plugin-react-hooks": "latest",
+        "prettier": "latest",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.56.0",
+        "vite": "^6.0.0"
+    }
+}

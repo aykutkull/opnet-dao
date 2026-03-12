@@ -1,0 +1,18 @@
+{
+    "name": "@opnet-dao/scripts",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "deploy": "tsx src/deploy.ts"
+    },
+    "dependencies": {
+        "@btc-vision/bitcoin": "rc",
+        "@btc-vision/transaction": "rc",
+        "opnet": "rc"
+    },
+    "devDependencies": {
+        "tsx": "latest",
+        "typescript": "^5.9.3"
+    }
+}

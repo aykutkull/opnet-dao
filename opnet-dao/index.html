@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OPNet DAO — Bitcoin Governance</title>
+<style>
+/* ── Variables ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:      #060a0f;
+  --bg2:     #0b1118;
+  --surface: #111820;
+  --surf2:   #182030;
+  --border:  #1c2a3d;
+  --border2: #253850;
+  --accent:  #f7931a;
+  --accent2: #ffb84d;
+  --blue:    #3d9eff;
+  --green:   #2ecf8a;
+  --red:     #f86060;
+  --yellow:  #f5c842;
+  --purple:  #9b72f7;
+  --text:    #dce8f5;
+  --muted:   #6a80a0;
+  --muted2:  #4a5f78;
+  --r:       14px;
+  --rsm:     8px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:64px;
+  background:rgba(11,17,24,0.93);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100;
+}
+
+.header-left{display:flex;align-items:center;gap:28px}
+
+.logo{display:flex;align-items:center;gap:10px;cursor:default}
+.logo-icon{font-size:24px;filter:drop-shadow(0 0 10px var(--accent))}
+.logo-text{display:flex;flex-direction:column;line-height:1.2}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:.02em}
+.logo-sub{font-size:11px;color:var(--muted)}
+
+.nav{display:flex;gap:2px}
+.nav-btn {
+  background:transparent;border:none;color:var(--muted);
+  font-size:14px;padding:7px 14px;border-radius:var(--rsm);
+  cursor:pointer;transition:all .15s;
+}
+.nav-btn:hover{color:var(--text);background:var(--surface)}
+.nav-btn.active{color:var(--accent);background:rgba(247,147,26,.1)}
+
+/* ── Wallet ─────────────────────────────────────────────────────────────────── */
+.wallet-area{display:flex;align-items:center;gap:10px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:none;border-radius:var(--rsm);cursor:pointer;
+  font-size:14px;font-weight:600;padding:9px 18px;
+  transition:all .15s;white-space:nowrap;
+}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-full{width:100%}
+.btn-for{background:rgba(46,207,138,.12);border:1px solid var(--green);color:var(--green)}
+.btn-for:hover{background:rgba(46,207,138,.22)}
+.btn-against{background:rgba(248,96,96,.1);border:1px solid var(--red);color:var(--red)}
+.btn-against:hover{background:rgba(248,96,96,.2)}
+.btn-danger{background:rgba(248,96,96,.08);border:1px solid var(--red);color:var(--red);font-size:13px}
+
+/* Connect Wallet button — prominent but not aggressive */
+.btn-connect{
+  background:transparent;
+  border:1.5px solid rgba(247,147,26,.55);
+  color:var(--accent);
+  padding:8px 18px;
+  border-radius:var(--rsm);
+  font-size:14px;font-weight:600;
+  letter-spacing:.01em;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s, color .2s, box-shadow .2s, background .2s;
+}
+.btn-connect::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(247,147,26,.08) 0%,transparent 70%);
+  opacity:0;transition:opacity .2s;
+}
+.btn-connect:hover{
+  border-color:rgba(247,147,26,.9);
+  color:var(--accent2);
+  box-shadow:0 0 14px rgba(247,147,26,.2);
+}
+.btn-connect:hover::before{opacity:1}
+
+/* Connected wallet pill */
+.wallet-wrap{position:relative}
+.wallet-pill{
+  display:flex;align-items:center;gap:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  transition:border-color .15s;
+}
+.wallet-pill.menu-open{border-color:rgba(247,147,26,.5)}
+.wallet-pill-net{
+  display:flex;align-items:center;gap:5px;
+  padding:7px 11px;
+  border-right:1px solid var(--border);
+  font-size:12px;color:var(--muted);
+}
+.wallet-pill-bal{
+  display:flex;align-items:center;gap:4px;
+  padding:7px 11px;
+  border-right:1px solid var(--border);
+  font-size:13px;font-weight:600;color:var(--accent);
+}
+.wallet-pill-bal .btc-icon{font-size:11px;color:var(--muted)}
+.wallet-pill-addr{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 13px;
+  font-size:12px;font-family:monospace;color:var(--text);
+  cursor:pointer;
+  transition:background .15s;
+  user-select:none;
+}
+.wallet-pill-addr:hover{background:var(--surf2)}
+.wallet-pill-addr svg{transition:transform .2s}
+.wallet-pill-addr.menu-open svg{transform:rotate(180deg)}
+
+.net-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+
+/* ── Wallet dropdown menu ─────────────────────────────────────────────────── */
+.wallet-menu{
+  position:absolute;top:calc(100% + 8px);right:0;
+  width:280px;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.6);
+  overflow:hidden;
+  opacity:0;pointer-events:none;
+  transform:translateY(-6px) scale(.97);
+  transform-origin:top right;
+  transition:opacity .18s, transform .18s;
+  z-index:200;
+}
+.wallet-menu.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1)}
+
+.wm-top{
+  padding:16px 16px 14px;
+  background:linear-gradient(135deg,rgba(247,147,26,.06),transparent);
+  border-bottom:1px solid var(--border);
+}
+.wm-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,#1a1000,#2a1800);
+  border:1.5px solid rgba(247,147,26,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:10px;
+}
+.wm-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.wm-fulladdr{
+  font-size:11.5px;font-family:monospace;color:var(--text);
+  word-break:break-all;line-height:1.5;
+}
+.wm-copy-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;
+}
+.wm-copy-btn{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:4px 10px;
+  font-size:12px;color:var(--muted);cursor:pointer;
+  transition:all .15s;
+}
+.wm-copy-btn:hover{border-color:var(--border2);color:var(--text)}
+.wm-copy-btn.copied{border-color:rgba(46,207,138,.4);color:var(--green);background:rgba(46,207,138,.07)}
+
+.wm-rows{padding:8px}
+.wm-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 8px;border-radius:8px;
+  font-size:13px;
+}
+.wm-row-label{color:var(--muted);font-size:12px}
+.wm-row-val{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
+
+.wm-divider{height:1px;background:var(--border);margin:4px 8px}
+
+.wm-disconnect{
+  display:flex;align-items:center;gap:8px;
+  width:100%;padding:10px 16px;
+  background:none;border:none;cursor:pointer;
+  color:var(--red);font-size:13px;font-weight:600;
+  transition:background .15s;
+  border-top:1px solid var(--border);
+}
+.wm-disconnect:hover{background:rgba(248,96,96,.08)}
+
+/* ── Wallet picker modal ─────────────────────────────────────────────────── */
+.wmodal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:18px;padding:28px;width:100%;max-width:380px;
+  transform:translateY(20px) scale(.97);
+  transition:transform .22s cubic-bezier(.34,1.3,.64,1);
+  position:relative;
+}
+.modal-overlay.open .wmodal{transform:translateY(0) scale(1)}
+.wmodal-header{margin-bottom:6px}
+.wmodal-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.wmodal-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+.wmodal-close{
+  position:absolute;top:16px;right:16px;
+  background:var(--surf2);border:1px solid var(--border);
+  border-radius:8px;color:var(--muted);font-size:16px;
+  cursor:pointer;width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.wmodal-close:hover{color:var(--text);border-color:var(--border2)}
+
+.wallet-option{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:12px;padding:16px;cursor:pointer;
+  transition:all .18s;position:relative;
+  margin-bottom:10px;
+  text-align:left;width:100%;
+}
+.wallet-option:hover{border-color:rgba(247,147,26,.5);background:rgba(247,147,26,.04)}
+.wallet-option.primary{border-color:rgba(247,147,26,.35)}
+.wallet-option.primary:hover{border-color:rgba(247,147,26,.75);box-shadow:0 0 20px rgba(247,147,26,.1)}
+.wallet-option-logo{
+  width:46px;height:46px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+  background:linear-gradient(135deg,#1a1000,#2a1800);
+  border:1px solid rgba(247,147,26,.2);
+}
+.wallet-option-info{flex:1}
+.wallet-option-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.wallet-option-desc{font-size:12px;color:var(--muted)}
+.wallet-option-badge{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  background:rgba(247,147,26,.15);color:var(--accent);
+  border:1px solid rgba(247,147,26,.3);border-radius:6px;
+  padding:2px 7px;margin-left:auto;flex-shrink:0;
+}
+.wallet-option-arrow{color:var(--muted2);font-size:16px;flex-shrink:0}
+
+.wmodal-divider{
+  display:flex;align-items:center;gap:10px;
+  margin:4px 0 10px;font-size:11px;color:var(--muted2);
+}
+.wmodal-divider::before,.wmodal-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.wallet-option-disabled{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px;opacity:.45;
+  cursor:not-allowed;margin-bottom:10px;
+}
+.wallet-option-disabled .wallet-option-logo{font-size:20px;width:40px;height:40px}
+.wallet-option-disabled .wallet-option-name{font-size:14px;font-weight:600}
+.wallet-option-disabled .wallet-option-desc{font-size:12px;color:var(--muted2)}
+.soon-badge{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  background:var(--surf2);color:var(--muted);
+  border:1px solid var(--border);border-radius:6px;
+  padding:2px 7px;margin-left:auto;
+}
+.wmodal-footer{font-size:11px;color:var(--muted2);text-align:center;margin-top:14px}
+
+/* ── Hero ───────────────────────────────────────────────────────────────────── */
+.hero{
+  position:relative;overflow:hidden;
+  padding:70px 28px 60px;text-align:center;
+  background:linear-gradient(180deg,rgba(247,147,26,.07) 0%,transparent 100%);
+  border-bottom:1px solid var(--border);
+}
+.hero-orb{
+  position:absolute;top:-140px;left:50%;transform:translateX(-50%);
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(247,147,26,.1) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-content{position:relative;z-index:1}
+.hero-badge{
+  display:inline-block;
+  background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.3);
+  border-radius:20px;color:var(--accent);
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 14px;margin-bottom:20px;
+}
+.hero-title{
+  font-size:clamp(26px,4.5vw,50px);font-weight:800;
+  line-height:1.15;margin-bottom:16px;letter-spacing:-.025em;
+}
+.hero-title .acc{color:var(--accent)}
+.hero-sub{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 28px}
+.hero-stats{
+  display:flex;justify-content:center;gap:40px;margin-top:8px;
+}
+.hero-stat{text-align:center}
+.hero-stat-val{font-size:22px;font-weight:800;color:var(--accent)}
+.hero-stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Main ───────────────────────────────────────────────────────────────────── */
+.main{
+  flex:1;max-width:920px;width:100%;
+  margin:0 auto;padding:32px 24px;
+  position:relative;z-index:1;
+}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── Section ────────────────────────────────────────────────────────────────── */
+.section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:28px;
+}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;
+}
+.section-title{font-size:18px;font-weight:700}
+
+/* ── Badges ─────────────────────────────────────────────────────────────────── */
+.badge{
+  display:inline-block;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  padding:3px 9px;border-radius:20px;
+}
+.b-pending {background:rgba(106,128,160,.12);color:var(--muted);border:1px solid var(--border)}
+.b-active  {background:rgba(46,207,138,.1);color:var(--green);border:1px solid rgba(46,207,138,.28)}
+.b-canceled{background:rgba(106,128,160,.08);color:var(--muted2);border:1px solid var(--border)}
+.b-defeated{background:rgba(248,96,96,.1);color:var(--red);border:1px solid rgba(248,96,96,.25)}
+.b-succeeded{background:rgba(61,158,255,.1);color:var(--blue);border:1px solid rgba(61,158,255,.28)}
+.b-executed{background:rgba(247,147,26,.1);color:var(--accent);border:1px solid rgba(247,147,26,.28)}
+
+/* ── Category tags (MakerDAO-style) ─────────────────────────────────────────── */
+.tag{
+  display:inline-block;font-size:11px;font-weight:600;
+  padding:2px 8px;border-radius:6px;letter-spacing:.02em;
+}
+.tag-protocol {background:rgba(155,114,247,.12);color:var(--purple);border:1px solid rgba(155,114,247,.25)}
+.tag-treasury {background:rgba(247,147,26,.1);color:var(--accent);border:1px solid rgba(247,147,26,.22)}
+.tag-params   {background:rgba(61,158,255,.1);color:var(--blue);border:1px solid rgba(61,158,255,.22)}
+.tag-ecosystem{background:rgba(46,207,138,.1);color:var(--green);border:1px solid rgba(46,207,138,.22)}
+.tag-security {background:rgba(248,96,96,.1);color:var(--red);border:1px solid rgba(248,96,96,.22)}
+.tag-delegates{background:rgba(245,200,66,.1);color:var(--yellow);border:1px solid rgba(245,200,66,.22)}
+
+/* ── Impact badge ────────────────────────────────────────────────────────────── */
+.impact{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  padding:2px 7px;border-radius:20px;
+}
+.impact::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.impact-high  {color:#f86060;border:1px solid rgba(248,96,96,.3);background:rgba(248,96,96,.07)}
+.impact-high::before{background:#f86060;box-shadow:0 0 4px #f86060}
+.impact-med   {color:var(--yellow);border:1px solid rgba(245,200,66,.3);background:rgba(245,200,66,.07)}
+.impact-med::before{background:var(--yellow);box-shadow:0 0 4px var(--yellow)}
+.impact-low   {color:var(--muted);border:1px solid var(--border);background:transparent}
+.impact-low::before{background:var(--muted2)}
+
+/* ── Filter bar ──────────────────────────────────────────────────────────────── */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;
+}
+.filter-chip{
+  background:transparent;border:1px solid var(--border);
+  border-radius:20px;color:var(--muted);
+  font-size:12px;font-weight:600;padding:5px 13px;
+  cursor:pointer;transition:all .15s;
+}
+.filter-chip:hover{border-color:var(--border2);color:var(--text)}
+.filter-chip.active{background:rgba(247,147,26,.1);border-color:rgba(247,147,26,.4);color:var(--accent)}
+.filter-sep{width:1px;height:18px;background:var(--border);margin:0 2px}
+
+/* ── Quorum bar ──────────────────────────────────────────────────────────────── */
+.quorum-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;gap:10px;
+}
+.quorum-track{
+  flex:1;height:4px;background:var(--surf2);border-radius:4px;overflow:hidden;
+}
+.quorum-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s ease}
+.quorum-fill.met{background:var(--green)}
+.quorum-label{font-size:11px;color:var(--muted);white-space:nowrap}
+.quorum-label span{color:var(--text);font-weight:600}
+
+/* ── Proposal meta footer ────────────────────────────────────────────────────── */
+.p-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;
+  font-size:12px;color:var(--muted2);
+  margin-bottom:14px;
+}
+.p-footer-stat{display:flex;align-items:center;gap:4px}
+.p-footer-stat svg{opacity:.6}
+
+/* ── Stats bar ───────────────────────────────────────────────────────────────── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;margin-bottom:20px;
+}
+.stat-cell{
+  background:var(--surface);
+  padding:14px 18px;
+  text-align:center;
+}
+.stat-cell-val{font-size:20px;font-weight:800;color:var(--text);line-height:1.1}
+.stat-cell-val .accent{color:var(--accent)}
+.stat-cell-lbl{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── Delegates ───────────────────────────────────────────────────────────────── */
+.delegate-grid{display:flex;flex-direction:column;gap:12px}
+.delegate-card{
+  display:flex;align-items:center;gap:16px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 20px;
+  transition:border-color .15s;
+}
+.delegate-card:hover{border-color:var(--border2)}
+.delegate-avatar{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:var(--bg);
+}
+.delegate-info{flex:1}
+.delegate-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.delegate-bio{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.delegate-stats{display:flex;gap:16px}
+.delegate-stat{font-size:12px;color:var(--muted2)}
+.delegate-stat span{color:var(--text);font-weight:600}
+.delegate-action{flex-shrink:0}
+
+/* ── Protocol params ─────────────────────────────────────────────────────────── */
+.params-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.param-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;
+}
+.param-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.param-value{font-size:18px;font-weight:800;color:var(--text);margin-bottom:2px}
+.param-sub{font-size:11px;color:var(--muted2)}
+
+/* ── Proposal card ──────────────────────────────────────────────────────────── */
+.proposal-list{display:flex;flex-direction:column;gap:16px;margin-top:0}
+
+.p-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:22px;
+  transition:border-color .15s;
+}
+.p-card:hover{border-color:var(--border2)}
+
+.p-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.p-meta{display:flex;align-items:center;gap:8px}
+.p-id{font-size:13px;color:var(--muted);font-family:monospace}
+.p-by{font-size:12px;color:var(--muted)}
+.p-addr{color:var(--blue);font-family:monospace}
+
+.p-desc{font-size:15px;line-height:1.65;margin-bottom:18px;color:var(--text)}
+
+/* vote bars */
+.vote-bars{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.v-row{display:grid;grid-template-columns:68px 1fr 100px;align-items:center;gap:10px}
+.v-lbl{font-size:12px;font-weight:600;text-align:right}
+.v-lbl.for{color:var(--green)}.v-lbl.ag{color:var(--red)}.v-lbl.ab{color:var(--muted)}
+.v-track{background:var(--surf2);border-radius:4px;height:6px;overflow:hidden}
+.v-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.v-fill.for{background:var(--green)}.v-fill.ag{background:var(--red)}.v-fill.ab{background:var(--muted2)}
+.v-num{font-size:12px;color:var(--muted);text-align:right}
+
+.p-info{display:flex;justify-content:space-between;font-size:12px;color:var(--muted2);margin-bottom:14px}
+
+.p-actions{
+  display:flex;gap:8px;flex-wrap:wrap;
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────────── */
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty-icon{font-size:44px;margin-bottom:14px}
+
+/* ── Create form ────────────────────────────────────────────────────────────── */
+.form{display:flex;flex-direction:column;gap:14px}
+.form-lbl{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted)}
+.char-cnt{font-weight:400;color:var(--muted2)}
+textarea.form-inp{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--rsm);color:var(--text);
+  font-size:14px;font-family:inherit;line-height:1.6;
+  padding:12px 14px;resize:vertical;width:100%;
+  transition:border-color .15s;
+}
+textarea.form-inp:focus{outline:none;border-color:var(--accent)}
+.form-hint{font-size:12px;color:var(--muted2)}
+.connect-prompt{color:var(--muted);text-align:center;padding:36px;font-size:15px}
+
+/* ── Treasury ───────────────────────────────────────────────────────────────── */
+.t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:26px}
+.t-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px;text-align:center}
+.t-icon{font-size:30px;margin-bottom:8px}
+.t-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.t-val{font-size:22px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.t-sub{font-size:11px;color:var(--muted2)}
+.dao-info{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.dao-info h3{font-size:15px;font-weight:700;margin-bottom:10px}
+.dao-info p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.dao-info ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.dao-info li{font-size:13px;color:var(--muted);padding-left:18px;position:relative}
+.dao-info li::before{content:'→';position:absolute;left:0;color:var(--accent)}
+
+/* ── Feedback ───────────────────────────────────────────────────────────────── */
+.tx-ok{
+  background:rgba(46,207,138,.1);border:1px solid rgba(46,207,138,.22);
+  border-radius:var(--rsm);color:var(--green);font-size:13px;padding:10px 14px;
+}
+.err{
+  background:rgba(248,96,96,.1);border:1px solid rgba(248,96,96,.22);
+  border-radius:var(--rsm);color:var(--red);font-size:13px;padding:10px 14px;
+}
+.info-msg{
+  background:rgba(61,158,255,.08);border:1px solid rgba(61,158,255,.22);
+  border-radius:var(--rsm);color:var(--blue);font-size:13px;padding:10px 14px;
+}
+
+/* ── Toast ──────────────────────────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px 18px;
+  font-size:13px;color:var(--text);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  transform:translateY(20px);opacity:0;
+  transition:all .3s;pointer-events:none;z-index:999;
+  max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{margin-right:8px}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+.footer{
+  text-align:center;padding:24px;font-size:13px;
+  color:var(--muted2);border-top:1px solid var(--border);
+  position:relative;z-index:1;
+}
+
+/* ── Modal ──────────────────────────────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(4px);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--r);padding:28px;width:100%;max-width:440px;
+  transform:translateY(16px);transition:transform .2s;
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:18px}
+.modal-close{
+  position:absolute;top:14px;right:14px;background:none;
+  border:none;color:var(--muted);font-size:20px;cursor:pointer;
+  padding:4px 8px;border-radius:6px;
+}
+.modal-close:hover{color:var(--text);background:var(--surf2)}
+.modal{position:relative}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media(max-width:640px){
+  .header{flex-direction:column;height:auto;padding:12px 16px;gap:10px}
+  .header-left{flex-direction:column;gap:10px;width:100%}
+  .nav{justify-content:center}
+  .hero{padding:36px 16px 32px}
+  .hero-stats{gap:24px}
+  .main{padding:20px 14px}
+  .v-row{grid-template-columns:60px 1fr 80px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <span class="logo-icon">⛓</span>
+      <div class="logo-text">
+        <span class="logo-name">OPNet DAO</span>
+        <span class="logo-sub">Bitcoin Governance</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" onclick="switchTab('proposals',this)">Proposals</button>
+      <button class="nav-btn" onclick="switchTab('delegates',this)">Delegates</button>
+      <button class="nav-btn" onclick="switchTab('create',this)">+ New Proposal</button>
+      <button class="nav-btn" onclick="switchTab('treasury',this)">Treasury</button>
+    </nav>
+  </div>
+  <div class="wallet-area" id="walletArea">
+    <button class="btn btn-connect" onclick="openWalletModal()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      Connect Wallet
+    </button>
+  </div>
+</header>
+
+<!-- ── Hero (only on proposals tab) ───────────────────────────────────────── -->
+<div id="heroSection">
+  <div class="hero">
+    <div class="hero-orb"></div>
+    <div class="hero-content">
+      <div class="hero-badge">The Breakthrough — Hackathon 2025</div>
+      <h1 class="hero-title">
+        Everything that ran on ETH &amp; SOL —<br>
+        <span class="acc">now on Bitcoin.</span>
+      </h1>
+      <p class="hero-sub">
+        Fully on-chain governance on Bitcoin Layer 1, powered by OPNet smart contracts.
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statProposals">4</div>
+          <div class="hero-stat-lbl">Proposals</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">100M</div>
+          <div class="hero-stat-lbl">GOV Supply</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">4%</div>
+          <div class="hero-stat-lbl">Quorum</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">144</div>
+          <div class="hero-stat-lbl">Voting Blocks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main ───────────────────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- PROPOSALS TAB -->
+  <div id="tab-proposals" class="tab-content active">
+
+    <!-- Stats bar -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-cell">
+        <div class="stat-cell-val" id="sb-active"><span class="accent">1</span></div>
+        <div class="stat-cell-lbl">Active Proposals</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-val" id="sb-total">4</div>
+        <div class="stat-cell-lbl">Total Proposals</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-val" id="sb-voters">47</div>
+        <div class="stat-cell-lbl">Unique Voters</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-val" id="sb-participation">68<span style="font-size:14px;color:var(--muted)">%</span></div>
+        <div class="stat-cell-lbl">Avg Participation</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2 class="section-title">Governance Proposals</h2>
+        <button class="btn btn-ghost btn-sm" onclick="refreshProposals()">↻ Refresh</button>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-chip" onclick="setFilter('active',this)">Active</button>
+        <button class="filter-chip" onclick="setFilter('ended',this)">Ended</button>
+        <div class="filter-sep"></div>
+        <button class="filter-chip" onclick="setFilter('protocol',this)">Protocol</button>
+        <button class="filter-chip" onclick="setFilter('treasury',this)">Treasury</button>
+        <button class="filter-chip" onclick="setFilter('params',this)">Parameters</button>
+        <button class="filter-chip" onclick="setFilter('ecosystem',this)">Ecosystem</button>
+      </div>
+
+      <div class="proposal-list" id="proposalList">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- DELEGATES TAB -->
+  <div id="tab-delegates" class="tab-content">
+    <div class="section">
+      <div class="section-head">
+        <h2 class="section-title">Delegates</h2>
+        <span style="font-size:13px;color:var(--muted)">Delegate your GOV voting power</span>
+      </div>
+      <div class="info-msg" style="margin-bottom:20px">
+        Delegates vote on your behalf. You retain full ownership of your GOV tokens and can undelegate at any time.
+      </div>
+      <div class="delegate-grid" id="delegateGrid"><!-- rendered by JS --></div>
+    </div>
+  </div>
+
+  <!-- CREATE TAB -->
+  <div id="tab-create" class="tab-content">
+    <div class="section">
+      <h2 class="section-title" style="margin-bottom:22px">Create Proposal</h2>
+      <div id="createContent">
+        <div class="connect-prompt">
+          🔗 Connect your OPWallet to submit a proposal.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREASURY TAB -->
+  <div id="tab-treasury" class="tab-content">
+    <div class="section">
+      <h2 class="section-title" style="margin-bottom:22px">Treasury &amp; DAO Info</h2>
+      <div class="t-grid">
+        <div class="t-card">
+          <div class="t-icon">₿</div>
+          <div class="t-lbl">BTC Balance</div>
+          <div class="t-val" id="btcBal">—</div>
+          <div class="t-sub">Connect wallet</div>
+        </div>
+        <div class="t-card">
+          <div class="t-icon">🗳</div>
+          <div class="t-lbl">GOV Supply</div>
+          <div class="t-val">100M</div>
+          <div class="t-sub">Governance token</div>
+        </div>
+        <div class="t-card">
+          <div class="t-icon">⚡</div>
+          <div class="t-lbl">Network</div>
+          <div class="t-val">Bitcoin</div>
+          <div class="t-sub">L1 via OPNet</div>
+        </div>
+        <div class="t-card">
+          <div class="t-icon">📜</div>
+          <div class="t-lbl">Quorum</div>
+          <div class="t-val">4%</div>
+          <div class="t-sub">Of circulating supply</div>
+        </div>
+        <div class="t-card">
+          <div class="t-icon">⏱</div>
+          <div class="t-lbl">Voting Period</div>
+          <div class="t-val">144</div>
+          <div class="t-sub">blocks (~1 day)</div>
+        </div>
+        <div class="t-card">
+          <div class="t-icon">✅</div>
+          <div class="t-lbl">Proposals</div>
+          <div class="t-val" id="tProposals">4</div>
+          <div class="t-sub">Total created</div>
+        </div>
+      </div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--muted)">PROTOCOL PARAMETERS</h3>
+      <div class="params-grid">
+        <div class="param-card">
+          <div class="param-label">Voting Period</div>
+          <div class="param-value">144 <span style="font-size:13px;font-weight:400;color:var(--muted)">blocks</span></div>
+          <div class="param-sub">~24 hours on Bitcoin</div>
+        </div>
+        <div class="param-card">
+          <div class="param-label">Quorum Threshold</div>
+          <div class="param-value">4<span style="font-size:13px;font-weight:400;color:var(--muted)">%</span></div>
+          <div class="param-sub">4,000,000 GOV required</div>
+        </div>
+        <div class="param-card">
+          <div class="param-label">Proposal Threshold</div>
+          <div class="param-value">1,000 <span style="font-size:13px;font-weight:400;color:var(--muted)">GOV</span></div>
+          <div class="param-sub">Minimum to propose</div>
+        </div>
+        <div class="param-card">
+          <div class="param-label">Total GOV Supply</div>
+          <div class="param-value">100M <span style="font-size:13px;font-weight:400;color:var(--muted)">GOV</span></div>
+          <div class="param-sub">Fixed maximum supply</div>
+        </div>
+      </div>
+      <div class="dao-info">
+        <h3>About OPNet DAO</h3>
+        <p>
+          OPNet DAO is a fully on-chain governance protocol running on Bitcoin Layer 1 via OPNet.
+          GOV token holders propose, vote on, and execute changes directly on Bitcoin —
+          no sidechains, no bridges, no compromises.
+        </p>
+        <ul>
+          <li>Proposals are open for voting for 144 blocks (~1 day on Bitcoin)</li>
+          <li>A proposal passes when For votes exceed Against votes at voting end</li>
+          <li>Passed proposals can be executed by any member after they succeed</li>
+          <li>Proposers can cancel their own proposals before execution</li>
+          <li>Smart contracts compiled to WebAssembly, deployed directly on Bitcoin L1</li>
+          <li>Governance power is proportional to GOV token holdings; delegate freely</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  OPNet DAO — Built on <a href="https://opnet.org" target="_blank">OPNet</a>
+  · Bitcoin L1 · The Breakthrough Hackathon 2025
+</footer>
+
+<!-- ── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"><span class="toast-icon"></span><span id="toastMsg"></span></div>
+
+<!-- ── Wallet Picker Modal ─────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="walletModal">
+  <div class="wmodal">
+    <button class="wmodal-close" onclick="closeModal('walletModal')">✕</button>
+    <div class="wmodal-header">
+      <div class="wmodal-title">Connect Wallet</div>
+      <div class="wmodal-sub">Choose a wallet to connect to OPNet DAO</div>
+    </div>
+
+    <!-- OPWallet — primary -->
+    <button class="wallet-option primary" onclick="selectWallet('OPWallet')">
+      <div class="wallet-option-logo">₿</div>
+      <div class="wallet-option-info">
+        <div class="wallet-option-name">OPWallet</div>
+        <div class="wallet-option-desc">Native Bitcoin L1 &amp; OPNet smart contracts</div>
+      </div>
+      <span class="wallet-option-badge">Recommended</span>
+      <span class="wallet-option-arrow">›</span>
+    </button>
+
+    <div class="wmodal-divider">More wallets</div>
+
+    <!-- Unisat — coming soon -->
+    <div class="wallet-option-disabled">
+      <div class="wallet-option-logo" style="font-size:18px">🟠</div>
+      <div class="wallet-option-info">
+        <div class="wallet-option-name">UniSat</div>
+        <div class="wallet-option-desc">Bitcoin ordinals &amp; BRC-20</div>
+      </div>
+      <span class="soon-badge">Soon</span>
+    </div>
+
+    <!-- Xverse — coming soon -->
+    <div class="wallet-option-disabled">
+      <div class="wallet-option-logo" style="font-size:18px">🔷</div>
+      <div class="wallet-option-info">
+        <div class="wallet-option-name">Xverse</div>
+        <div class="wallet-option-desc">Bitcoin &amp; Stacks wallet</div>
+      </div>
+      <span class="soon-badge">Soon</span>
+    </div>
+
+    <div class="wmodal-footer">
+      By connecting you agree to the OPNet DAO terms of use
+    </div>
+  </div>
+</div>
+
+<!-- ── Vote Modal ─────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="voteModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('voteModal')">✕</button>
+    <div class="modal-title">Cast Your Vote</div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px" id="voteProposalDesc"></p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-for btn-full" onclick="castVote(1)">
+        ✓ Vote For
+      </button>
+      <button class="btn btn-against btn-full" onclick="castVote(0)">
+        ✗ Vote Against
+      </button>
+      <button class="btn btn-ghost btn-full" onclick="castVote(2)">
+        — Abstain
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let connected    = false;
+let walletAddr   = '';
+let activeVoteId = null;
+let currentFilter = 'all';
+
+const STATE_LABEL  = ['Pending','Active','Canceled','Defeated','Succeeded','Executed'];
+const STATE_CLASS  = ['b-pending','b-active','b-canceled','b-defeated','b-succeeded','b-executed'];
+const QUORUM_VOTES = 4000; // demo threshold (4M GOV sim as 4000 votes)
+
+// ── Proposals data ─────────────────────────────────────────────────────────
+let proposals = [
+  {
+    id: 3,
+    proposer: 'bc1pqhu3yx5z7w8e9r2a4s6d7f8g9h0j1k2l3m4n5p6q7r',
+    title: 'Deploy NFT Marketplace with 2.5% Protocol Fee',
+    description: 'Deploy an OPNet-native NFT marketplace with a 2.5% protocol fee on all secondary sales. Fee revenue split 50% to treasury and 50% to GOV stakers proportional to stake weight. The marketplace will support Bitcoin-native assets and launch on OPNet Mainnet within 30 days of proposal passage.',
+    category: 'protocol',
+    impact: 'high',
+    forVotes: 2840,
+    againstVotes: 310,
+    abstainVotes: 120,
+    voters: 47,
+    govWeight: '28.4M',
+    startBlock: 892100,
+    endBlock: 892244,
+    state: 1,
+    voted: false,
+    daysAgo: 0,
+    blocksLeft: 38,
+  },
+  {
+    id: 2,
+    proposer: 'bc1pabs1def2ghi3jkl4mno5pqr6stu7vwx8yz9abc0de',
+    title: 'Treasury Grant Program — Q1 2026 (500k GOV)',
+    description: 'Allocate 5% of treasury reserves (500,000 GOV) as ecosystem grants for teams building on OPNet. Grants distributed over Q1 2026 by a 3-of-5 multisig committee elected by separate DAO vote. Maximum single grant: 50,000 GOV. Milestone-based disbursement required for all recipients.',
+    category: 'treasury',
+    impact: 'high',
+    forVotes: 5120,
+    againstVotes: 980,
+    abstainVotes: 440,
+    voters: 112,
+    govWeight: '51.2M',
+    startBlock: 891850,
+    endBlock: 891994,
+    state: 4,
+    voted: false,
+    daysAgo: 2,
+    blocksLeft: 0,
+  },
+  {
+    id: 1,
+    proposer: 'bc1pxyz9abc8def7ghi6jkl5mno4pqr3stu2vwx1yz0ab',
+    title: 'Reduce Voting Period from 144 to 72 Blocks',
+    description: 'Reduce the governance voting period from 144 blocks (~24 hours) to 72 blocks (~12 hours) to increase governance velocity. Faster cycles enable rapid response to time-sensitive protocol conditions. Risk: shorter windows may reduce participation from globally distributed GOV holders.',
+    category: 'params',
+    impact: 'med',
+    forVotes: 1200,
+    againstVotes: 3400,
+    abstainVotes: 230,
+    voters: 78,
+    govWeight: '12.0M',
+    startBlock: 891500,
+    endBlock: 891644,
+    state: 3,
+    voted: false,
+    daysAgo: 5,
+    blocksLeft: 0,
+  },
+  {
+    id: 0,
+    proposer: 'bc1pmno4pqr3stu2vwx1yz0ab9abc8def7ghi6jkl5mn',
+    title: 'DAO Genesis — Initialize Protocol Parameters',
+    description: 'Initialize the OPNet DAO with founding parameters: 100M GOV maximum supply, 4% quorum threshold (4M GOV), 144-block voting period, and deploy GovernanceToken + DAOGovernor contracts to OPNet testnet. Establishes the constitutional framework for all subsequent governance actions.',
+    category: 'protocol',
+    impact: 'high',
+    forVotes: 8800,
+    againstVotes: 200,
+    abstainVotes: 400,
+    voters: 203,
+    govWeight: '88.0M',
+    startBlock: 891100,
+    endBlock: 891244,
+    state: 5,
+    voted: false,
+    daysAgo: 8,
+    blocksLeft: 0,
+  },
+];
+
+// ── Delegates data ─────────────────────────────────────────────────────────
+const delegates = [
+  {
+    name: 'BitcoinMaximalist',
+    emoji: '🦁',
+    color: '#f7931a',
+    bio: 'Core OPNet protocol contributor. Focused on security, minimal governance overhead, and strict Bitcoin L1 alignment across all proposals.',
+    power: '8.4M',
+    proposals: 12,
+    participation: '94%',
+  },
+  {
+    name: 'SatoshiDAO',
+    emoji: '🏛',
+    color: '#3d9eff',
+    bio: 'DAO-first delegate. Votes on all proposals with thorough on-chain research. Prioritizes ecosystem growth and equitable token distribution.',
+    power: '6.1M',
+    proposals: 11,
+    participation: '100%',
+  },
+  {
+    name: 'OPNetDev',
+    emoji: '⚙',
+    color: '#9b72f7',
+    bio: 'Infrastructure and smart contract engineer. Advocates for technical proposals that improve OPNet performance, security, and developer experience.',
+    power: '4.7M',
+    proposals: 9,
+    participation: '82%',
+  },
+  {
+    name: 'TreasuryGuild',
+    emoji: '💎',
+    color: '#2ecf8a',
+    bio: 'Treasury management specialists. Applies DeFi risk frameworks to evaluate financial proposals, grants, and protocol treasury allocations.',
+    power: '3.2M',
+    proposals: 8,
+    participation: '88%',
+  },
+  {
+    name: 'HashRateHolders',
+    emoji: '⛏',
+    color: '#f5c842',
+    bio: 'Represents Bitcoin miners and infrastructure providers. Ensures governance decisions align with miner incentives and long-term Bitcoin security.',
+    power: '2.9M',
+    proposals: 7,
+    participation: '71%',
+  },
+];
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(icon, msg, duration = 3200) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.querySelector('.toast-icon').textContent = icon + ' ';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  const hero = document.getElementById('heroSection');
+  hero.style.display = name === 'proposals' ? 'block' : 'none';
+
+  if (name === 'create') renderCreateForm();
+  if (name === 'delegates') renderDelegates();
+}
+
+// ── Filter ─────────────────────────────────────────────────────────────────
+function setFilter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderProposals();
+}
+
+// ── Wallet Connect ─────────────────────────────────────────────────────────
+let btcBalance   = '';
+let walletAddrFull = '';  // full unshortened address
+
+function openWalletModal() {
+  document.getElementById('walletModal').classList.add('open');
+}
+
+function selectWallet(name) {
+  closeModal('walletModal');
+
+  const area = document.getElementById('walletArea');
+  area.innerHTML = `<span style="font-size:13px;color:var(--muted)">Connecting…</span>`;
+
+  setTimeout(() => {
+    const seg = () => Math.random().toString(36).slice(2, 9);
+    walletAddrFull = 'bc1p' + seg() + seg() + seg() + seg();
+    walletAddr     = walletAddrFull.slice(0, 10) + '…' + walletAddrFull.slice(-6);
+    btcBalance     = (Math.random() * 0.3 + 0.01).toFixed(4);
+    connected      = true;
+    renderWallet();
+    renderProposals();
+    renderCreateForm();
+    document.getElementById('btcBal').textContent = btcBalance + ' BTC';
+    showToast('✅', name + ' connected');
+  }, 700);
+}
+
+function disconnectWallet() {
+  connected      = false;
+  walletAddr     = '';
+  walletAddrFull = '';
+  btcBalance     = '';
+  closeWalletMenu();
+  renderWallet();
+  renderProposals();
+  renderCreateForm();
+  document.getElementById('btcBal').textContent = '—';
+  showToast('👋', 'Wallet disconnected');
+}
+
+function renderWallet() {
+  const area = document.getElementById('walletArea');
+  if (connected) {
+    area.innerHTML = `
+      <div class="wallet-wrap">
+        <div class="wallet-pill" id="walletPill">
+          <div class="wallet-pill-net">
+            <span class="net-dot"></span>Testnet
+          </div>
+          <div class="wallet-pill-bal">
+            <span class="btc-icon">₿</span>${btcBalance}
+          </div>
+          <div class="wallet-pill-addr" id="walletAddrBtn" onclick="toggleWalletMenu()">
+            ${walletAddr}
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg>
+          </div>
+        </div>
+        <div class="wallet-menu" id="walletMenu">
+          <div class="wm-top">
+            <div class="wm-avatar">₿</div>
+            <div class="wm-label">Wallet address</div>
+            <div class="wm-fulladdr" id="wm-fulladdr">${walletAddrFull}</div>
+            <div class="wm-copy-row">
+              <button class="wm-copy-btn" id="copyBtn" onclick="copyAddress()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy address
+              </button>
+            </div>
+          </div>
+          <div class="wm-rows">
+            <div class="wm-row">
+              <span class="wm-row-label">Network</span>
+              <span class="wm-row-val">
+                <span class="net-dot"></span>OPNet Testnet
+              </span>
+            </div>
+            <div class="wm-row">
+              <span class="wm-row-label">Balance</span>
+              <span class="wm-row-val" style="color:var(--accent)">₿ ${btcBalance} BTC</span>
+            </div>
+            <div class="wm-row">
+              <span class="wm-row-label">GOV tokens</span>
+              <span class="wm-row-val">1,000,000 GOV</span>
+            </div>
+          </div>
+          <button class="wm-disconnect" onclick="disconnectWallet()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Disconnect wallet
+          </button>
+        </div>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <button class="btn btn-connect" onclick="openWalletModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        Connect Wallet
+      </button>`;
+  }
+}
+
+// ── Wallet menu ────────────────────────────────────────────────────────────
+function toggleWalletMenu() {
+  const menu = document.getElementById('walletMenu');
+  const btn  = document.getElementById('walletAddrBtn');
+  const pill = document.getElementById('walletPill');
+  if (!menu) return;
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) {
+    menu.classList.remove('open');
+    btn.classList.remove('menu-open');
+    pill.classList.remove('menu-open');
+  } else {
+    menu.classList.add('open');
+    btn.classList.add('menu-open');
+    pill.classList.add('menu-open');
+  }
+}
+
+function closeWalletMenu() {
+  const menu = document.getElementById('walletMenu');
+  const btn  = document.getElementById('walletAddrBtn');
+  const pill = document.getElementById('walletPill');
+  if (menu) menu.classList.remove('open');
+  if (btn)  btn.classList.remove('menu-open');
+  if (pill) pill.classList.remove('menu-open');
+}
+
+function copyAddress() {
+  navigator.clipboard.writeText(walletAddrFull).then(() => {
+    const btn = document.getElementById('copyBtn');
+    if (!btn) return;
+    btn.classList.add('copied');
+    btn.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+      Copied!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy address`;
+    }, 2000);
+  }).catch(() => showToast('📋', 'Copy not available'));
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmtAddr(a) {
+  if (a.length <= 14) return a;
+  return a.slice(0,8) + '…' + a.slice(-6);
+}
+
+function pct(v, total) {
+  if (total === 0) return 0;
+  return Math.round((v / total) * 1000) / 10;
+}
+
+function fmtVotes(n) {
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return n.toString();
+}
+
+function timeAgo(daysAgo) {
+  if (daysAgo === 0) return 'Today';
+  if (daysAgo === 1) return '1 day ago';
+  return daysAgo + ' days ago';
+}
+
+// ── Render Proposals ───────────────────────────────────────────────────────
+function renderProposals() {
+  const list = document.getElementById('proposalList');
+  list.innerHTML = '';
+
+  const filtered = proposals.filter(p => {
+    if (currentFilter === 'all')    return true;
+    if (currentFilter === 'active') return p.state === 1;
+    if (currentFilter === 'ended')  return p.state >= 3;
+    return p.category === currentFilter;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No proposals match this filter.</div>';
+  } else {
+    filtered.forEach(p => list.appendChild(buildCard(p)));
+  }
+
+  // Update stats bar
+  const activeCount = proposals.filter(p => p.state === 1).length;
+  const maxVoters   = proposals.reduce((m, p) => Math.max(m, p.voters), 0);
+  document.getElementById('sb-active').innerHTML = `<span class="accent">${activeCount}</span>`;
+  document.getElementById('sb-total').textContent  = proposals.length;
+  document.getElementById('sb-voters').textContent = maxVoters;
+  document.getElementById('statProposals').textContent = proposals.length;
+  document.getElementById('tProposals').textContent    = proposals.length;
+}
+
+function buildCard(p) {
+  const total = p.forVotes + p.againstVotes + p.abstainVotes;
+  const fPct  = pct(p.forVotes,      total);
+  const aPct  = pct(p.againstVotes,  total);
+  const abPct = pct(p.abstainVotes,  total);
+
+  const quorumPct   = Math.min(100, Math.round((total / QUORUM_VOTES) * 100));
+  const quorumMet   = total >= QUORUM_VOTES;
+  const quorumLabel = quorumMet ? 'Quorum met' : quorumPct + '% of quorum';
+
+  const div = document.createElement('div');
+  div.className = 'p-card';
+  div.id = 'card-' + p.id;
+
+  let actionHtml = '';
+  if (connected) {
+    if (p.state === 1 && !p.voted) {
+      actionHtml = `<button class="btn btn-for" onclick="openVoteModal(${p.id})">✓ Vote</button>`;
+    }
+    if (p.state === 1 && p.voted) {
+      actionHtml = `<span class="badge b-active" style="padding:7px 12px">✓ Voted</span>`;
+    }
+    if (p.state === 4) {
+      actionHtml = `<button class="btn btn-primary" onclick="executeProposal(${p.id})">⚡ Execute</button>`;
+    }
+  }
+
+  div.innerHTML = `
+    <div class="p-head">
+      <div class="p-meta" style="flex-wrap:wrap;gap:6px">
+        <span class="p-id">#${p.id}</span>
+        <span class="badge ${STATE_CLASS[p.state]}">${STATE_LABEL[p.state]}</span>
+        <span class="tag tag-${p.category}">${p.category}</span>
+        <span class="impact impact-${p.impact}">${p.impact} impact</span>
+      </div>
+      <div class="p-by">by <span class="p-addr">${fmtAddr(p.proposer)}</span></div>
+    </div>
+
+    <p style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text)">${p.title}</p>
+    <p class="p-desc" style="font-size:13px;color:var(--muted);margin-bottom:16px">${p.description}</p>
+
+    <div class="vote-bars">
+      <div class="v-row">
+        <span class="v-lbl for">For</span>
+        <div class="v-track"><div class="v-fill for" style="width:${fPct}%"></div></div>
+        <span class="v-num">${fmtVotes(p.forVotes)} (${fPct}%)</span>
+      </div>
+      <div class="v-row">
+        <span class="v-lbl ag">Against</span>
+        <div class="v-track"><div class="v-fill ag" style="width:${aPct}%"></div></div>
+        <span class="v-num">${fmtVotes(p.againstVotes)} (${aPct}%)</span>
+      </div>
+      <div class="v-row">
+        <span class="v-lbl ab">Abstain</span>
+        <div class="v-track"><div class="v-fill ab" style="width:${abPct}%"></div></div>
+        <span class="v-num">${fmtVotes(p.abstainVotes)} (${abPct}%)</span>
+      </div>
+    </div>
+
+    <div class="quorum-row">
+      <span class="quorum-label"><span>${quorumLabel}</span></span>
+      <div class="quorum-track">
+        <div class="quorum-fill ${quorumMet ? 'met' : ''}" style="width:${quorumPct}%"></div>
+      </div>
+      <span class="quorum-label" style="margin-left:8px">${p.voters} voters · ${p.govWeight} GOV</span>
+    </div>
+
+    <div class="p-footer">
+      <span class="p-footer-stat">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        ${p.state === 1 ? p.blocksLeft + ' blocks remaining' : timeAgo(p.daysAgo)}
+      </span>
+      <span class="p-footer-stat">Blocks ${p.startBlock.toLocaleString()} → ${p.endBlock.toLocaleString()}</span>
+    </div>
+
+    ${actionHtml ? `<div class="p-actions">${actionHtml}</div>` : ''}
+  `;
+  return div;
+}
+
+// ── Delegates ──────────────────────────────────────────────────────────────
+function renderDelegates() {
+  const grid = document.getElementById('delegateGrid');
+  if (!grid) return;
+  grid.innerHTML = delegates.map(d => `
+    <div class="delegate-card">
+      <div class="delegate-avatar" style="background:${d.color}22;border:1.5px solid ${d.color}55">
+        <span style="font-size:20px">${d.emoji}</span>
+      </div>
+      <div class="delegate-info">
+        <div class="delegate-name">${d.name}</div>
+        <div class="delegate-bio">${d.bio}</div>
+        <div class="delegate-stats">
+          <span class="delegate-stat">Power: <span>${d.power} GOV</span></span>
+          <span class="delegate-stat">Voted: <span>${d.proposals} props</span></span>
+          <span class="delegate-stat">Participation: <span>${d.participation}</span></span>
+        </div>
+      </div>
+      <div class="delegate-action">
+        <button class="btn btn-ghost btn-sm" onclick="showToast('🗳','Connect wallet to delegate')">Delegate</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Vote Modal ─────────────────────────────────────────────────────────────
+function openVoteModal(id) {
+  if (!connected) { showToast('🔗', 'Connect your wallet first'); return; }
+  activeVoteId = id;
+  const p = proposals.find(x => x.id === id);
+  document.getElementById('voteProposalDesc').textContent = '#' + id + ' — ' + p.title;
+  document.getElementById('voteModal').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function castVote(support) {
+  closeModal('voteModal');
+  const p = proposals.find(x => x.id === activeVoteId);
+  if (!p) return;
+
+  // Simulate vote
+  if (support === 1) p.forVotes += 1;
+  else if (support === 0) p.againstVotes += 1;
+  else p.abstainVotes += 1;
+  p.voters += 1;
+  p.voted = true;
+
+  const labels = ['Against','For','Abstain'];
+  showToast('🗳', `Voted ${labels[support]} on proposal #${activeVoteId}`);
+  renderProposals();
+  activeVoteId = null;
+}
+
+function executeProposal(id) {
+  const p = proposals.find(x => x.id === id);
+  if (!p) return;
+  p.state = 5;
+  showToast('⚡', `Proposal #${id} executed!`);
+  renderProposals();
+}
+
+// ── Create Form ────────────────────────────────────────────────────────────
+function renderCreateForm() {
+  const el = document.getElementById('createContent');
+  if (!connected) {
+    el.innerHTML = `<div class="connect-prompt">🔗 Connect your OPWallet to submit a proposal.</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="form" id="propForm">
+      <label class="form-lbl">
+        Proposal Description
+        <span class="char-cnt"><span id="charCount">0</span>/500</span>
+      </label>
+      <textarea
+        class="form-inp"
+        id="propDesc"
+        rows="7"
+        maxlength="500"
+        placeholder="Describe what you want the DAO to do and why. Be clear and specific."
+        oninput="updateChar(this)"
+      ></textarea>
+      <div class="form-hint">
+        Proposals are permanent on-chain. Voting opens immediately after submission. Max 500 characters.
+      </div>
+      <div id="propFeedback"></div>
+      <button class="btn btn-primary btn-full" onclick="submitProposal()" id="submitBtn" disabled>
+        Submit Proposal
+      </button>
+    </div>`;
+}
+
+function updateChar(el) {
+  const n = el.value.length;
+  document.getElementById('charCount').textContent = n;
+  document.getElementById('submitBtn').disabled = n < 20;
+}
+
+function submitProposal() {
+  const desc = document.getElementById('propDesc').value.trim();
+  if (desc.length < 20) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  // Simulate tx
+  setTimeout(() => {
+    const newId = proposals.length;
+    proposals.unshift({
+      id: newId,
+      proposer: walletAddrFull,
+      title: desc.slice(0, 60) + (desc.length > 60 ? '…' : ''),
+      description: desc,
+      category: 'ecosystem',
+      impact: 'low',
+      forVotes: 0,
+      againstVotes: 0,
+      abstainVotes: 0,
+      voters: 0,
+      govWeight: '0',
+      startBlock: 892500,
+      endBlock: 892644,
+      state: 1,
+      voted: false,
+      daysAgo: 0,
+      blocksLeft: 144,
+    });
+    document.getElementById('propFeedback').innerHTML =
+      `<div class="tx-ok">✅ Proposal #${newId} submitted! Tx: 0xabc123def456…</div>`;
+    btn.textContent = 'Submit Proposal';
+    btn.disabled = true;
+    document.getElementById('propDesc').value = '';
+    document.getElementById('charCount').textContent = '0';
+    renderProposals();
+    showToast('✅', 'Proposal created successfully!');
+    setTimeout(() => {
+      const proposalsBtn = document.querySelector('.nav-btn');
+      switchTab('proposals', proposalsBtn);
+    }, 1800);
+  }, 1400);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+function refreshProposals() {
+  showToast('🔄', 'Refreshing proposals…');
+  setTimeout(renderProposals, 600);
+}
+
+// Close modals on overlay click
+document.getElementById('voteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('voteModal');
+});
+document.getElementById('walletModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('walletModal');
+});
+
+// Close wallet menu on outside click
+document.addEventListener('click', function(e) {
+  const wrap = document.querySelector('.wallet-wrap');
+  if (wrap && !wrap.contains(e.target)) closeWalletMenu();
+});
+
+// Boot
+renderProposals();
+</script>
+</body>
+</html>

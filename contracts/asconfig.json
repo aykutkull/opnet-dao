@@ -1,0 +1,33 @@
+{
+    "targets": {
+        "token": {
+            "outFile": "build/GovernanceToken.wasm",
+            "use": ["abort=src/token/index/abort"]
+        },
+        "governor": {
+            "outFile": "build/DAOGovernor.wasm",
+            "use": ["abort=src/governor/index/abort"]
+        }
+    },
+    "options": {
+        "sourceMap": false,
+        "optimizeLevel": 3,
+        "shrinkLevel": 1,
+        "converge": true,
+        "noAssert": false,
+        "enable": [
+            "sign-extension",
+            "mutable-globals",
+            "nontrapping-f2i",
+            "bulk-memory",
+            "simd",
+            "reference-types",
+            "multi-value"
+        ],
+        "runtime": "stub",
+        "memoryBase": 0,
+        "initialMemory": 1,
+        "exportStart": "start",
+        "transform": "@btc-vision/opnet-transform"
+    }
+}

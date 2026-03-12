@@ -1,0 +1,17 @@
+{
+    "name": "opnet-dao",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "workspaces": [
+        "contracts",
+        "frontend",
+        "scripts"
+    ],
+    "scripts": {
+        "build:contracts": "npm run build --workspace=contracts",
+        "dev:frontend": "npm run dev --workspace=frontend",
+        "build:frontend": "npm run build --workspace=frontend",
+        "deploy": "npm run deploy --workspace=scripts"
+    }
+}
